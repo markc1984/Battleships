@@ -92,26 +92,26 @@ namespace Battleships
             return false;
         }
 
+        // CreateLookupTables creates grid lookup table to translate inputted literal coordinate to integer equivalent
         private static void CreateLookupTables()
         {
-            // Create grid lookup table to translate inputted literal coordinate to integer equivalent
-            int numeric1 = 1;
+            int numeric = 1;
             for (char c = 'A'; c <= 'J'; c++)
             {
-                map.Add(c, numeric1);
-                numeric1++;
+                map.Add(c, numeric);
+                numeric++;
             }
-            int numeric2 = 1;
-
+            // set the counter back to 1
+            numeric = 1;
             // Create inverse grid lookup table to translate inputted integer coordinate to its literal equivalent
             for (char c = 'A'; c <= 'J'; c++)
             {
-                mapreverse.Add(numeric2, c);
-                numeric2++;
+                mapreverse.Add(numeric, c);
+                numeric++;
             }
         }
 
-        // start a new game by erasing and readding players
+        // StartGame starts a new game by erasing and readding players
         private static void StartGame()
         {
             players = new List<Player>();
@@ -121,7 +121,7 @@ namespace Battleships
                 players.Add(new Player());
             }
 
-            // set the current player back to the human player if it wasn't before
+            // set the current player back to the human player if it wasn't set at that before
             currentplayer = 0;
             opposition = 1;
 
@@ -195,8 +195,8 @@ namespace Battleships
         // a method that prints out the currently fired coordinates and the current state of the game
         private static void PrintStatistics()
         {
+            // display a key of what the different colours signify
             Console.Clear();
-
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Red = Hit/Ship Destroyed");
             Console.ForegroundColor = ConsoleColor.Blue;
@@ -204,8 +204,10 @@ namespace Battleships
             Console.ResetColor();
             Console.WriteLine();
 
+            // for each player in the players list
             for (int i = 0; i < players.Count; i++)
             {
+                // print player name
                 Console.WriteLine("----------");
                 Console.WriteLine(players[i].EntrantName);
                 Console.WriteLine("----------");
@@ -217,13 +219,15 @@ namespace Battleships
 
                 for (int k = 0; k < players[i].AttemptedCoordinates.Count; k++)
                 {
+                    // look up the attempted coordinates list
                     KeyValuePair<char, int> keyValuePair = CoordinatesLookupReverse(players[i].AttemptedCoordinates[k]);
-
+                    // mark attempted coordinate as red if it was a hit
                     if (players[i].AttemptedCoordinates[k].wasCoordHit)
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.Write(keyValuePair.Key + keyValuePair.Value.ToString() + " - Hit - " + "(" + GetShipName(players[i].AttemptedCoordinates[k].Ship) + ") ");
                     }
+                    // mark attempted coordinate as blue if it was a miss
                     else
                     {
                         Console.ForegroundColor = ConsoleColor.Blue;
@@ -234,15 +238,16 @@ namespace Battleships
                 Console.WriteLine();
                 for (int j = 0; j < players[i].ShipInventory.Count; j++)
                 {
-
                     Console.Write(GetShipName(players[i].ShipInventory[j]) + " - " + "Current Status: ", ConsoleColor.White);
 
+                    // mark destroyed ship as red
                     if (players[i].ShipInventory[j].IsShipEliminated)
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.Write("Destroyed");
                         Console.ResetColor();
                     }
+                    // mark active ship as blue
                     else
                     {
                         Console.ForegroundColor = ConsoleColor.Blue;
