@@ -34,12 +34,14 @@ namespace Battleships
                     // if the coordinates are valid, take the shot
                     else
                     {
+                        // if the shot has already been taken, don't swap to next player, reiterate the loop until non duplicate coordinates are added
                         if (TakeAShot(inputcoordinates))
                         {
                             continue;
                         }
                         else
                         {
+                            // increment current player to CPU, decrement opposing player to human
                             currentplayer++;
                             opposition--;
                         }
@@ -59,6 +61,7 @@ namespace Battleships
                     // if shot hasn't been taken, move on to next player
                     else
                     {
+                        // decrement current player to human, increment opposing player to CPU
                         currentplayer--;
                         opposition++;
                     }
@@ -108,6 +111,7 @@ namespace Battleships
             }
         }
 
+        // start a new game by erasing and readding players
         private static void StartGame()
         {
             players = new List<Player>();
@@ -117,6 +121,7 @@ namespace Battleships
                 players.Add(new Player());
             }
 
+            // set the current player back to the human player if it wasn't before
             currentplayer = 0;
             opposition = 1;
 
@@ -191,6 +196,14 @@ namespace Battleships
         private static void PrintStatistics()
         {
             Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Red = Hit/Ship Destroyed");
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("Blue = Miss/Ship Active");
+            Console.ResetColor();
+            Console.WriteLine();
+
             for (int i = 0; i < players.Count; i++)
             {
                 Console.WriteLine("----------");
@@ -251,36 +264,15 @@ namespace Battleships
             // if the coordinates aren't duplicated by the current player
             if (!CheckForDuplicateTries(coords))
             {
-                Coordinates updatedCoordinates = RegisterHitCoordinates(coords, players[opposition]);
-          
+                Coordinates updatedCoordinates = RegisterHitCoordinates(coords, players[opposition]);        
                 // if a ship is returned, this means there is a match
 
                 if (updatedCoordinates != null)
                 {
-                    Console.WriteLine("That was a hit on " + players[opposition].EntrantName + "'s " + GetShipName(updatedCoordinates.Ship) + " at grid " + keyValuePair.Key + keyValuePair.Value.ToString());
-
                     CheckIfShipIsEliminated(updatedCoordinates.Ship);
-                    // if the ship is eliminated for provided coordinates
 
-                    if (updatedCoordinates.Ship.IsShipEliminated)
-                    {
-                        Console.WriteLine("A " + GetShipName(updatedCoordinates.Ship) + " was eliminated belonging to " + updatedCoordinates.shotCalledBy.EntrantName);
-                    }
                 }
                 // return null if there was no ship that matched provided coordinates
-                else
-                {
-                    // if the current player is human
-                    if (currentplayer == 0)
-                    {
-                        Console.WriteLine("You fired at " + keyValuePair.Key + keyValuePair.Value.ToString() + " and missed!");
-                    }
-                    // the current player is CPU
-                    else
-                    {
-                        Console.WriteLine("Computer fired at " + keyValuePair.Key + keyValuePair.Value.ToString() + " and missed!");
-                    }
-                }
             }
             // if the coordinates are a duplicate entry
             else
