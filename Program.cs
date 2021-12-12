@@ -222,7 +222,7 @@ namespace Battleships
                     if (players[i].AttemptedCoordinates[k].wasCoordHit)
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write(keyValuePair.Key + keyValuePair.Value.ToString() + " (" + GetShipName(players[i].AttemptedCoordinates[k].Ship) + ") ");
+                        Console.Write(keyValuePair.Key + keyValuePair.Value.ToString() + " - Hit - " + "(" + GetShipName(players[i].AttemptedCoordinates[k].Ship) + ") ");
                     }
                     else
                     {
@@ -264,15 +264,33 @@ namespace Battleships
             // if the coordinates aren't duplicated by the current player
             if (!CheckForDuplicateTries(coords))
             {
-                Coordinates updatedCoordinates = RegisterHitCoordinates(coords, players[opposition]);        
                 // if a ship is returned, this means there is a match
+                Coordinates updatedCoordinates = RegisterHitCoordinates(coords, players[opposition]);        
 
                 if (updatedCoordinates != null)
                 {
-                    CheckIfShipIsEliminated(updatedCoordinates.Ship);
+                    if (CheckIfShipIsEliminated(updatedCoordinates.Ship))
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine(players[currentplayer].EntrantName + " eliminates " + players[opposition].EntrantName + "'s " + GetShipName(updatedCoordinates.Ship) + "...");
+                        Console.Write("Press enter to continue...");
+                        Console.ReadLine();
+                    }
+                    else
+                    {
+                        Console.WriteLine(players[currentplayer].EntrantName + " fires at " + players[opposition].EntrantName + "'s cordinates at " + keyValuePair.Key + keyValuePair.Value.ToString() + " and HITS their " + GetShipName(updatedCoordinates.Ship) + "...");
+                        Console.Write("Press enter to continue...");
+                        Console.ReadLine();
+                    }
 
                 }
-                // return null if there was no ship that matched provided coordinates
+                // else if null
+                else
+                {                 
+                    Console.WriteLine(players[currentplayer].EntrantName + " fires at " + players[opposition].EntrantName + "'s cordinates at " + keyValuePair.Key + keyValuePair.Value.ToString() + " and misses...");
+                    Console.Write("Press enter to continue...");
+                    Console.ReadLine();
+                }
             }
             // if the coordinates are a duplicate entry
             else
@@ -289,7 +307,6 @@ namespace Battleships
         private static Coordinates RegisterHitCoordinates(Coordinates coords, Player player)
         {
             players[currentplayer].AttemptedCoordinates.Add(coords);
-            int attemptcoordscounter = players[currentplayer].AttemptedCoordinates.Count-1;
 
             // traverse player ship coordinates
             for (int i = 0; i < player.ShipInventory.Count; i++)
@@ -307,6 +324,7 @@ namespace Battleships
                     {
                         player.ShipInventory[i].CoOrds[j].wasCoordHit = true;
                         player.ShipInventory[i].CoOrds[j].shotCalledBy = player;
+                        // update the last added element in the attempted coordinates list to signify that we have a hit coordinate and who the shot was called by
                         players[currentplayer].AttemptedCoordinates[players[currentplayer].AttemptedCoordinates.Count - 1] = player.ShipInventory[i].CoOrds[j];
                         return player.ShipInventory[i].CoOrds[j];
                     }
