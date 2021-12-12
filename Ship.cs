@@ -9,13 +9,16 @@ namespace Battleships
     public enum Orientation { Horizontal, Vertical };
     public enum ShipType { Battleship, Destroyer };
 
+    // the ship class contains information about each ship, including the type of ship, the coordinates that belong to the ship, as well as containing information such as if the ship was destroyed, its orientation on the grid, the number of spaces it occupies and
+    // whetheror not that ship has already been added to the game
     public class Ship
     {
+        #region class constructors
         public Ship()
         {
 
         }
-
+        // randomly orientate the ship position when it is instantiated
         public Ship(int shiptype)
         {
             Random r = new Random();
@@ -31,15 +34,19 @@ namespace Battleships
                 typeofship = (int)ShipType.Destroyer;
                 numofspaces = 4;
             }
-
         }
+        #endregion
 
+        #region private class variables
         private int numofspaces;
-        private List<Coordinates> coordinates = new List<Coordinates>();
+        private List<Coordinates> coordinates = new();
         private int orientatation;
         private bool shipeliminated;
         private bool alreadyadded;
         private int typeofship = 0;
+        #endregion
+
+        #region class accessors
 
         public int NumOfSpaces
         {
@@ -76,6 +83,6 @@ namespace Battleships
             get { return typeofship; }
             set { typeofship = value; }
         }
-
+        #endregion
     }
 }

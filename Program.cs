@@ -70,6 +70,7 @@ namespace Battleships
                     Console.WriteLine("Congratulations " + players[opposition].EntrantName + " you won the game");
                     Console.WriteLine("Press enter to start again...");
                     Console.ReadLine();
+                    Console.Clear();
                     StartGame();
                 }
             }
@@ -133,12 +134,11 @@ namespace Battleships
 
 
             // for testing - output ship coordinates to console
-
+            Console.WriteLine("----------");
+            Console.WriteLine(players[0].EntrantName);
+            Console.WriteLine("----------");
             for (int i = 0; i < players[0].ShipInventory.Count; i++)
-            {
-                Console.WriteLine("----------");
-                Console.WriteLine(players[0].EntrantName);
-                Console.WriteLine("----------");
+            {        
                 int ori = 0;
                 ori = players[0].ShipInventory[i].ShipOrientation;
                 Console.WriteLine(GetShipName(players[0].ShipInventory[i]));
@@ -160,11 +160,11 @@ namespace Battleships
                 Console.WriteLine();
             }
 
+            Console.WriteLine("----------");
+            Console.WriteLine(players[1].EntrantName);
+            Console.WriteLine("----------");
             for (int i = 0; i < players[1].ShipInventory.Count; i++)
             {
-                Console.WriteLine("----------");
-                Console.WriteLine(players[1].EntrantName);
-                Console.WriteLine("----------");
                 int ori = 0;
                 ori = players[1].ShipInventory[i].ShipOrientation;
 
@@ -183,6 +183,7 @@ namespace Battleships
                     KeyValuePair<char, int> pair = CoordinatesLookupReverse(players[1].ShipInventory[i].CoOrds[j]);
                     Console.WriteLine(pair.Key + pair.Value.ToString());
                 }
+                Console.WriteLine();
             }
         }
 
@@ -281,12 +282,13 @@ namespace Battleships
                     }
                 }
             }
-            // if the coordinates are a 
+            // if the coordinates are a duplicate entry
             else
             {
                 Console.WriteLine(keyValuePair.Key + keyValuePair.Value.ToString() +  " has already been fired upon by you");
                 return true;
             }
+            // call the PrintStatistics method to display the current status of the game
             PrintStatistics();
             return false;
         }
@@ -379,24 +381,23 @@ namespace Battleships
         {
             KeyValuePair<char, int> store;
             char output;
+            // look up directionary mappings, if a corresponding key is present then output the paired value to that key
             mapreverse.TryGetValue(coords.X, out output);
             store = new KeyValuePair<char, int>(output, coords.Y);
             return store;
         }
 
         // method that validates the entered X and Y literal coordinates, converts them to an integer and returns a coordinate object
-        private static Coordinates CoordinatesLookupTable(string str)
+        private static Coordinates? CoordinatesLookupTable(string str)
         {
             char xcolumn;
-            int x = 0;
-            int y = 0;
 
             Char.TryParse(str.Substring(0, 1), out xcolumn);
             // if the value in the lookup table exists, it means the entry is valid
-            if (map.TryGetValue(xcolumn, out x))
+            if (map.TryGetValue(xcolumn, out int x))
             {
                 // if the numeric part of the string successfully parses
-                if (Int32.TryParse(str.Substring(1), out y))
+                if (Int32.TryParse(str.Substring(1), out int y))
                 {
                     // if the numeric value is equal or lower than the permitted boundary size
                     if (y <= 10)

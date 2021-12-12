@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace Battleships
 {
+    // the player class stores all information about the player, the list of ships in the inventory and a list of attempted coordinates, irrespective of whether those coordinates belonged to a ship or not
     public class Player
     {
         #region Class constructors
         public Player()
         {
+            // when a player class is instantiated, automatically populate new ships to the grid
             for (int i = 0; i < 2; i++)
             {
                 shipinventory.Add(new Ship((int)ShipType.Destroyer));
@@ -51,8 +53,6 @@ namespace Battleships
             get { return attemptedcoordinates; }
             set { attemptedcoordinates = value; }
         }
-
-
         #endregion
     }
 }

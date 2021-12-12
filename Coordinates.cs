@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace Battleships
 {
+    // the coordinates class stores X and Y values as integers directly relatable to the battleship game, as well as if the coordinate was hit, who called that particular shot (because each player can call the same shot once) and the ship those 
+    // coordinates belong to
     public class Coordinates
     {
         private int x;
         private int y;
         private bool coordhit;
-        private Player? player;
-        private Ship? ship;
 
         public int X
         {
@@ -32,17 +32,9 @@ namespace Battleships
             set { coordhit = value; }
         }
 
-        public Player shotCalledBy
-        {
-            get { return player; }
-            set { player = value; }
-        }
+        public Player? shotCalledBy { get; set; }
 
-        public Ship Ship
-        {
-            get { return ship; }
-            set { ship = value; }
-        }
+        public Ship? Ship { get; set; }
     }
 }
 
