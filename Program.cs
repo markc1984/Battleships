@@ -136,8 +136,12 @@ namespace Battleships
 
             for (int i = 0; i < players[0].ShipInventory.Count; i++)
             {
+                Console.WriteLine("----------");
+                Console.WriteLine(players[0].EntrantName);
+                Console.WriteLine("----------");
                 int ori = 0;
                 ori = players[0].ShipInventory[i].ShipOrientation;
+                Console.WriteLine(GetShipName(players[0].ShipInventory[i]));
 
                 if (ori == 0)
                 {
@@ -158,8 +162,13 @@ namespace Battleships
 
             for (int i = 0; i < players[1].ShipInventory.Count; i++)
             {
+                Console.WriteLine("----------");
+                Console.WriteLine(players[1].EntrantName);
+                Console.WriteLine("----------");
                 int ori = 0;
                 ori = players[1].ShipInventory[i].ShipOrientation;
+
+                Console.WriteLine(GetShipName(players[1].ShipInventory[i]));
 
                 if (ori == 0)
                 {
@@ -177,6 +186,7 @@ namespace Battleships
             }
         }
 
+        // a method that prints out the currently fired coordinates and the current state of the game
         private static void PrintStatistics()
         {
             Console.Clear();
@@ -518,6 +528,7 @@ namespace Battleships
             return false;
         }
 
+        // method that returns the string name of the type of ship
         private static string GetShipName(Ship ship)
         {
             if (ship.TypeOfShip == (int)ShipType.Battleship)
