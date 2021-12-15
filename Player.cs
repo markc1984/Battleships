@@ -22,7 +22,6 @@ namespace Battleships
         #endregion
 
         #region Class variables
-        private string entrantName = "";
         private List<Ship> shipinventory = new List<Ship>();
         private List<Coordinates> attemptedcoordinates = new List<Coordinates>();
         private bool shipseliminated;
@@ -30,11 +29,7 @@ namespace Battleships
         #endregion
 
         #region Accessor variables for entrants
-        public string EntrantName
-        {
-            get { return entrantName; }
-            set { entrantName = value; }
-        }
+        public string? EntrantName { get; set; } = "";
 
         public List<Ship> ShipInventory
         {
