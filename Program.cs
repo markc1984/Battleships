@@ -24,27 +24,39 @@ namespace Battleships
                     // print
                     Console.Write(players[currentplayer].EntrantName + ", please enter your co-ordinate: ");
                     // Use lookup table to convert literal coordinates in to a numeric coordinate object
-                    inputcoordinates = CoordinatesLookupTable(Console.ReadLine());
-                    // if returned coordinates are null, it means the entry entered went beyond the 10 x 10 grid
-                    if (inputcoordinates == null)
+                    string consoleinput;
+
+                    consoleinput = Console.ReadLine();
+
+                    if (!String.IsNullOrWhiteSpace(consoleinput))
                     {
-                        Console.WriteLine("Coordinates out of bounds, please try again.");
-                        continue;
-                    }
-                    // if the coordinates are valid, take the shot
-                    else
-                    {
-                        // if the shot has already been taken, don't swap to next player, reiterate the loop until non duplicate coordinates are added
-                        if (TakeAShot(inputcoordinates))
+                        inputcoordinates = CoordinatesLookupTable(consoleinput);
+                        // if returned coordinates are null, it means the entry entered went beyond the 10 x 10 grid
+                        if (inputcoordinates == null)
                         {
+                            Console.WriteLine("Coordinates out of bounds, please try again.");
                             continue;
                         }
+                        // if the coordinates are valid, take the shot
                         else
                         {
-                            // increment current player to CPU, decrement opposing player to human
-                            currentplayer++;
-                            opposition--;
+                            // if the shot has already been taken, don't swap to next player, reiterate the loop until non duplicate coordinates are added
+                            if (TakeAShot(inputcoordinates))
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                // increment current player to CPU, decrement opposing player to human
+                                currentplayer++;
+                                opposition--;
+                            }
                         }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid entry, please try again.");
+                        continue;
                     }
                 }
                 // if the current player is the computer
