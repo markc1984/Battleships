@@ -405,22 +405,22 @@ namespace Battleships
             KeyValuePair<char, int> store;
             char output;
             // look up directionary mappings, if a corresponding key is present then output the paired value to that key
-            mapreverse.TryGetValue(coords.X, out output);
-            store = new KeyValuePair<char, int>(output, coords.Y);
+            mapreverse.TryGetValue(coords.Y, out output);
+            store = new KeyValuePair<char, int>(output, coords.X);
             return store;
         }
 
         // method that validates the entered X and Y literal coordinates, converts them to an integer and returns a coordinate object
         private static Coordinates? CoordinatesLookupTable(string str)
         {
-            char xcolumn;
+            char column;
 
-            Char.TryParse(str.Substring(0, 1), out xcolumn);
+            Char.TryParse(str.Substring(0, 1), out column);
             // if the value in the lookup table exists, it means the entry is valid
-            if (map.TryGetValue(xcolumn, out int x))
+            if (map.TryGetValue(column, out int y))
             {
                 // if the numeric part of the string successfully parses
-                if (Int32.TryParse(str.Substring(1), out int y))
+                if (Int32.TryParse(str.Substring(1), out int x))
                 {
                     // if the numeric value is equal or lower than the permitted boundary size
                     if (y <= 10)
@@ -568,33 +568,50 @@ namespace Battleships
 
         public static void PrintGrid()
         {
+            char c = 'A';
+            int counter = 1;
+
             Console.Clear();
             bool match = false;
             Console.WriteLine("------------");
             Console.WriteLine(players[currentplayer].EntrantName);
             Console.WriteLine("------------");
 
-            for (int i = 0; i <= 9; i++)
+            for (int i = 0; i <= 10; i++)
             {
-                for (int j = 0; j <= 9; j++)
+                for (int j = 0; j <= 10; j++)
                 {
+                    if (j == 0 && i == 0)
+                    {
+                        Console.Write("  ");
+
+                    }
+                    if (j >= 0 && i == 0 && j <= 9)
+                    {
+                        Console.Write(c + "  ");
+                        c++;
+                    }
+
                     for (int k = 0; k < players[currentplayer].ShipInventory.Count; k++)
                     {
+
                         for (int l = 0; l < players[currentplayer].ShipInventory[k].CoOrds.Count; l++)
                         {
-                            if (players[currentplayer].ShipInventory[k].CoOrds[l].X - 1 == i && players[currentplayer].ShipInventory[k].CoOrds[l].Y - 1 == j)
+
+
+                            if (players[currentplayer].ShipInventory[k].CoOrds[l].X == i && players[currentplayer].ShipInventory[k].CoOrds[l].Y == j)
                             {
                                 if (players[currentplayer].ShipInventory[k].CoOrds[l].wasCoordHit)
                                 {
                                     Console.ForegroundColor = ConsoleColor.Red;
-                                    Console.Write("X ");
+                                    Console.Write("X  ");
                                     match = true;
                                     Console.ResetColor();
                                 }
                                 else
                                 {
                                     Console.ForegroundColor = ConsoleColor.Blue;
-                                    Console.Write("o ");
+                                    Console.Write("o  ");
                                     match = true;
                                     Console.ResetColor();
                                 }
@@ -604,25 +621,41 @@ namespace Battleships
 
                     if (!match)
                     {
-                        for (int k = 0;k < players[currentplayer].AttemptedCoordinates.Count; k++)
+                        for (int k = 0; k < players[currentplayer].AttemptedCoordinates.Count; k++)
                         {
-                            if (players[currentplayer].AttemptedCoordinates[k].X - 1 == i && players[currentplayer].AttemptedCoordinates[k].Y - 1 == j)
+                            if (players[currentplayer].AttemptedCoordinates[k].X == i && players[currentplayer].AttemptedCoordinates[k].Y == j)
                             {
                                 Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.Write("x ");
+                                Console.Write("x  ");
                                 match = true;
                                 Console.ResetColor();
                             }
                         }
 
+                        if (j == 0 && i > 0 && i < 10)
+                        {
+                            Console.Write(counter + " ");
+                            counter++;
+                        
+                        }
+
+                        if (j == 0 && i == 10)
+                        {
+                            Console.Write(counter);
+                        }
+
                         if (!match)
                         {
-                            Console.Write("* ");
+                            if (i > 0 && j > 0)
+                            {
+                                Console.Write("*  ");
+                            }
                         }
                         match = false;
                     }
 
-                    if (j == 9)
+
+                    if (j == 10)
                     {
                         Console.WriteLine();
                     }
