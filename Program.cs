@@ -17,9 +17,13 @@ namespace Battleships
 
             while (true)
             {
+                Console.WriteLine();
                 Coordinates? inputcoordinates;
                 if (currentplayer == 0)
                 {
+                    PrintGrid();
+                    CheatSheet();
+
                     // print
                     Console.Write(players[currentplayer].EntrantName + ", please enter your co-ordinate: ");
                     // Use lookup table to convert literal coordinates in to a numeric coordinate object
@@ -40,6 +44,7 @@ namespace Battleships
                         // if the coordinates are valid, take the shot
                         else
                         {
+                            Console.WriteLine();
                             // if the shot has already been taken, don't swap to next player, reiterate the loop until non duplicate coordinates are added
                             if (TakeAShot(inputcoordinates))
                             {
@@ -149,34 +154,6 @@ namespace Battleships
             players[0].EntrantName = Console.ReadLine();
             players[1].EntrantName = "Computer";
 
-
-            // for testing - output ship coordinates to console
-            Console.WriteLine("----------");
-            Console.WriteLine(players[0].EntrantName);
-            Console.WriteLine("----------");
-            for (int i = 0; i < players[0].ShipInventory.Count; i++)
-            {
-                int ori = 0;
-                ori = players[0].ShipInventory[i].ShipOrientation;
-                Console.WriteLine(GetShipName(players[0].ShipInventory[i]));
-
-                if (ori == 0)
-                {
-                    Console.WriteLine("Horizontal");
-                }
-                else
-                {
-                    Console.WriteLine("Vertical");
-                }
-                for (int j = 0; j < players[0].ShipInventory[i].CoOrds.Count; j++)
-                {
-                    KeyValuePair<char, int> pair = CoordinatesLookupReverse(players[0].ShipInventory[i].CoOrds[j]);
-
-                    Console.WriteLine(pair.Key + pair.Value.ToString());
-                }
-                Console.WriteLine();
-            }
-
             Console.WriteLine("----------");
             Console.WriteLine(players[1].EntrantName);
             Console.WriteLine("----------");
@@ -271,6 +248,39 @@ namespace Battleships
             Console.WriteLine();
         }
 
+        private static void CheatSheet()
+        {
+            // for testing - output ship coordinates to console
+            for (int i = 0; i < players.Count; i++)
+            {
+                for (int j = 0; j < players[i].ShipInventory.Count; j++)
+                {
+                    Console.WriteLine("----------");
+                    Console.WriteLine(players[i].EntrantName);
+                    Console.WriteLine("----------");
+                    int ori = 0;
+                    ori = players[i].ShipInventory[j].ShipOrientation;
+                    Console.WriteLine(GetShipName(players[i].ShipInventory[j]));
+
+                    if (ori == 0)
+                    {
+                        Console.WriteLine("Horizontal");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Vertical");
+                    }
+                    for (int k = 0; k < players[i].ShipInventory[j].CoOrds.Count; k++)
+                    {
+                        KeyValuePair<char, int> pair = CoordinatesLookupReverse(players[i].ShipInventory[j].CoOrds[k]);
+
+                        Console.WriteLine(pair.Key + pair.Value.ToString());
+                    }
+                    Console.WriteLine();
+                }
+            }
+        }
+
         // The TakeAShot method initiates a shot from either player, it returns a boolean true or false to the initial calling method as to whether or not there is a duplicate coordinates entry by either player
         private static bool TakeAShot(Coordinates coords)
         {
@@ -312,7 +322,6 @@ namespace Battleships
             }
             // call the PrintStatistics method to display the current status of the game
             //PrintStatistics();
-            PrintGrid();
             return false;
         }
 
@@ -569,7 +578,8 @@ namespace Battleships
         public static void PrintGrid()
         {
             char c = 'A';
-            int counter = 1;
+            int rowa = 1;
+            int rowb = 1;
 
             Console.Clear();
             bool match = false;
@@ -579,70 +589,98 @@ namespace Battleships
 
             for (int i = 0; i <= 10; i++)
             {
-                for (int j = 0; j <= 10; j++)
+                for (int j = 0; j <= 20; j++)
                 {
-                    if (j == 0 && i == 0)
+                    if (j == 11)
+                    {
+                        Console.Write("\t");
+                        c = 'A';
+                    }
+
+                    if (j == 0 && i == 0 || j == 11 && i == 0)
                     {
                         Console.Write("  ");
-
                     }
-                    if (j >= 0 && i == 0 && j <= 9)
+
+                    if (j >= 0 && i == 0 && j <= 9 || j >= 11 && i == 0 && j <= 20)
                     {
                         Console.Write(c + "  ");
                         c++;
                     }
 
-                    for (int k = 0; k < players[currentplayer].ShipInventory.Count; k++)
+                    if (i != 0)
                     {
-
-                        for (int l = 0; l < players[currentplayer].ShipInventory[k].CoOrds.Count; l++)
+                        for (int k = 0; k < players[0].ShipInventory.Count; k++)
                         {
-
-
-                            if (players[currentplayer].ShipInventory[k].CoOrds[l].X == i && players[currentplayer].ShipInventory[k].CoOrds[l].Y == j)
+                            for (int l = 0; l < players[0].ShipInventory[k].CoOrds.Count; l++)
                             {
-                                if (players[currentplayer].ShipInventory[k].CoOrds[l].wasCoordHit)
-                                {
-                                    Console.ForegroundColor = ConsoleColor.Red;
-                                    Console.Write("X  ");
-                                    match = true;
-                                    Console.ResetColor();
-                                }
-                                else
+
+                                if (players[0].ShipInventory[k].CoOrds[l].X == i && (players[0].ShipInventory[k].CoOrds[l].Y) == j && !players[0].ShipInventory[k].CoOrds[l].wasCoordHit)
                                 {
                                     Console.ForegroundColor = ConsoleColor.Blue;
                                     Console.Write("o  ");
                                     match = true;
                                     Console.ResetColor();
                                 }
+                                
+                                else if (players[0].ShipInventory[k].CoOrds[l].X == i && (players[0].ShipInventory[k].CoOrds[l].Y) == j && players[0].ShipInventory[k].CoOrds[l].wasCoordHit)
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Red;
+                                    Console.Write("X  ");
+                                    match = true;
+                                    Console.ResetColor();
+                                }
                             }
                         }
                     }
 
-                    if (!match)
+                     if (!match)
                     {
+                        if (j == 0 && i > 0 && i < 11)
+                        {
+                            if (i == 10)
+                            {
+                                Console.Write(rowa);
+                            }
+                            else
+                            {
+                                Console.Write(rowa + " ");
+                            }
+                            rowa++;
+                        }
+                        else if (j == 11 && i > 0 && i < 11)
+                        {
+                            if (i == 10)
+                            {
+                                Console.Write(rowb);
+
+                            }
+                            else
+                            {
+                                Console.Write(rowb + " ");
+                            }
+                            rowb++;
+                        }
+
                         for (int k = 0; k < players[currentplayer].AttemptedCoordinates.Count; k++)
                         {
-                            if (players[currentplayer].AttemptedCoordinates[k].X == i && players[currentplayer].AttemptedCoordinates[k].Y == j)
+                            if (players[currentplayer].AttemptedCoordinates[k].X == i && (players[currentplayer].AttemptedCoordinates[k].Y + 10) == j && !players[currentplayer].AttemptedCoordinates[k].wasCoordHit)
                             {
                                 Console.ForegroundColor = ConsoleColor.Yellow;
                                 Console.Write("x  ");
                                 match = true;
                                 Console.ResetColor();
                             }
-                        }
 
-                        if (j == 0 && i > 0 && i < 10)
-                        {
-                            Console.Write(counter + " ");
-                            counter++;
+                            else if (players[currentplayer].AttemptedCoordinates[k].X == i && (players[currentplayer].AttemptedCoordinates[k].Y + 10) == j && players[currentplayer].AttemptedCoordinates[k].wasCoordHit)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.Write("X  ");
+                                match = true;
+                                Console.ResetColor();
+                            }
                         
-                        }
-
-                        if (j == 0 && i == 10)
-                        {
-                            Console.Write(counter);
-                        }
+                        }           
 
                         if (!match)
                         {
@@ -654,8 +692,7 @@ namespace Battleships
                         match = false;
                     }
 
-
-                    if (j == 10)
+                    if (j == 20)
                     {
                         Console.WriteLine();
                     }
