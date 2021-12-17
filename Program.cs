@@ -679,6 +679,14 @@ namespace Battleships
                                 match = true;
                                 Console.ResetColor();
                             }
+
+                            if (players[opposition].AttemptedCoordinates[k].X == i && (players[opposition].AttemptedCoordinates[k].Y) == j && !players[opposition].AttemptedCoordinates[k].wasCoordHit)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Cyan;
+                                Console.Write("x  ");
+                                match = true;
+                                Console.ResetColor();
+                            }
                         
                         }           
 
