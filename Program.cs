@@ -25,7 +25,7 @@ namespace Battleships
                     CheatSheet();
 
                     // print
-                    Console.Write(players[currentplayer].EntrantName + ", please enter your co-ordinate: ");
+                    Console.Write(players[currentplayer].EntrantName + ", please enter your grid co-ordinates (e.g A3, B5): ");
                     // Use lookup table to convert literal coordinates in to a numeric coordinate object
                     string? consoleinput;
 
@@ -248,37 +248,40 @@ namespace Battleships
             Console.WriteLine();
         }
 
+        // method that outputs the coordinate location
         private static void CheatSheet()
         {
-            // for testing - output ship coordinates to console
-            for (int i = 0; i < players.Count; i++)
+            Console.WriteLine();
+            Console.WriteLine("----------");
+            Console.WriteLine(players[1].EntrantName);
+            Console.WriteLine("----------");
+            Console.WriteLine();
+            for (int j = 0; j < players[1].ShipInventory.Count; j++)
             {
-                for (int j = 0; j < players[i].ShipInventory.Count; j++)
+                int ori = 0;
+                ori = players[1].ShipInventory[j].ShipOrientation;
+                Console.WriteLine(GetShipName(players[1].ShipInventory[j]));
+                Console.WriteLine("----------");
+
+
+                if (ori == 0)
                 {
-                    Console.WriteLine("----------");
-                    Console.WriteLine(players[i].EntrantName);
-                    Console.WriteLine("----------");
-                    int ori = 0;
-                    ori = players[i].ShipInventory[j].ShipOrientation;
-                    Console.WriteLine(GetShipName(players[i].ShipInventory[j]));
-
-                    if (ori == 0)
-                    {
-                        Console.WriteLine("Horizontal");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Vertical");
-                    }
-                    for (int k = 0; k < players[i].ShipInventory[j].CoOrds.Count; k++)
-                    {
-                        KeyValuePair<char, int> pair = CoordinatesLookupReverse(players[i].ShipInventory[j].CoOrds[k]);
-
-                        Console.WriteLine(pair.Key + pair.Value.ToString());
-                    }
-                    Console.WriteLine();
+                    Console.WriteLine("Horizontal");
                 }
+                else
+                {
+                    Console.WriteLine("Vertical");
+                }
+                Console.WriteLine();
+                for (int k = 0; k < players[1].ShipInventory[j].CoOrds.Count; k++)
+                {
+                    KeyValuePair<char, int> pair = CoordinatesLookupReverse(players[1].ShipInventory[j].CoOrds[k]);
+
+                    Console.WriteLine(pair.Key + pair.Value.ToString());
+                }
+                Console.WriteLine();
             }
+            
         }
 
         // The TakeAShot method initiates a shot from either player, it returns a boolean true or false to the initial calling method as to whether or not there is a duplicate coordinates entry by either player
@@ -330,7 +333,6 @@ namespace Battleships
         {
             players[currentplayer].AttemptedCoordinates.Add(coords);
 
-            // traverse player ship coordinates
             for (int i = 0; i < player.ShipInventory.Count; i++)
             {
                 // if ship has already been eliminated, we do not need to check again, move to next ship
@@ -361,20 +363,15 @@ namespace Battleships
             // initialise a hit counter
             int hits = 0;
 
-            // for each coordinate that belongs to the ship
             for (int i = 0; i < ship.CoOrds.Count; i++)
             {
-                // if the coordinate of ship was hit
                 if (ship.CoOrds[i].wasCoordHit)
                 {
-                    // increment the hit counter
                     hits++;
                 }
             }
-            // if the number of spaces the ship occupies matches the number of hits this ship has received
             if (hits == ship.NumOfSpaces)
             {
-                // flag the ship as eliminated and return true that the ship was eliminated
                 ship.IsShipEliminated = true;
                 return true;
             }
@@ -466,16 +463,16 @@ namespace Battleships
                 int x = r.Next(1, 11);
                 int y = r.Next(1, 11);
 
-                // Send x any y values, along with the associated ship to be placed and the player the ship belongs to
+                // Send x any y values and the associated ship to be placed along player the ship belongs to
                 GenerateCoordinateRanges(x, y, player.ShipInventory[i], player);
             }
         }
         private static void GenerateCoordinateRanges(int x, int y, Ship ship, Player player)
         {   // Create blank list of coordinates to be tested
             List<Coordinates> coordinates = new List<Coordinates>();
-            // the end coordinate that the ship will reach on the x axis using provided random coordinates
+            // the end coordinate that the ship will reach on the x axis
             int xupperbound = x + ship.NumOfSpaces;
-            // the end coordinate that the ship will reach on the y axis using provided random coordinates
+            // the end coordinate that the ship will reach on the y axis 
             int yupperbound = y + ship.NumOfSpaces;
             // origin x and y coordinates
             int xvalue = x;
@@ -577,9 +574,12 @@ namespace Battleships
 
         public static void PrintGrid()
         {
+            // only run if human player is current player to stop unncessary code execution
+
             char c = 'A';
             int rowa = 1;
             int rowb = 1;
+            List<string> legend = new List<string> { "Legend", "* = Unhit Coordinate", "o = Unhit Ship Coordinate", "x = Computer miss Player", "x = Player miss Computer", "X = Direct Hit" };
 
             Console.Clear();
             bool match = false;
@@ -587,34 +587,38 @@ namespace Battleships
             Console.WriteLine(players[currentplayer].EntrantName);
             Console.WriteLine("------------");
 
+            // 2D loop iteration i and j equals axis coords
             for (int i = 0; i <= 10; i++)
             {
-                for (int j = 0; j <= 20; j++)
+                for (int j = 0; j <= 30; j++)
                 {
-                    if (j == 11)
+                    // if the position is the second grid, produce a tab keypress and reset character back to A
+                    if (j == 11 || j == 21)
                     {
                         Console.Write("\t");
                         c = 'A';
                     }
 
+                    // if we are at the origin of either grid, we don't want any character to show as its not a valid grid coordinate
                     if (j == 0 && i == 0 || j == 11 && i == 0)
                     {
                         Console.Write("  ");
                     }
 
-                    if (j >= 0 && i == 0 && j <= 9 || j >= 11 && i == 0 && j <= 20)
+                    // if we are at ONLY the beginning of the grid at X and within the bounds of Y, write letter coordinates out for each grid
+                    if (i == 0 && j >= 0 && j <= 9 || i == 0 && j >= 11 && j <= 20)
                     {
                         Console.Write(c + "  ");
                         c++;
                     }
 
-                    if (i != 0)
+                    // only run this code if we are beyond row or column 0 (aka not at the origin or grid labels)
+                    if (i != 0 || j != 0)
                     {
                         for (int k = 0; k < players[0].ShipInventory.Count; k++)
                         {
                             for (int l = 0; l < players[0].ShipInventory[k].CoOrds.Count; l++)
                             {
-
                                 if (players[0].ShipInventory[k].CoOrds[l].X == i && (players[0].ShipInventory[k].CoOrds[l].Y) == j && !players[0].ShipInventory[k].CoOrds[l].wasCoordHit)
                                 {
                                     Console.ForegroundColor = ConsoleColor.Blue;
@@ -622,7 +626,7 @@ namespace Battleships
                                     match = true;
                                     Console.ResetColor();
                                 }
-                                
+
                                 else if (players[0].ShipInventory[k].CoOrds[l].X == i && (players[0].ShipInventory[k].CoOrds[l].Y) == j && players[0].ShipInventory[k].CoOrds[l].wasCoordHit)
                                 {
                                     Console.ForegroundColor = ConsoleColor.Red;
@@ -634,7 +638,8 @@ namespace Battleships
                         }
                     }
 
-                     if (!match)
+                    // run this code block if there are previously no matching coordinates above
+                    if (!match)
                     {
                         if (j == 0 && i > 0 && i < 11)
                         {
@@ -664,6 +669,7 @@ namespace Battleships
 
                         for (int k = 0; k < players[currentplayer].AttemptedCoordinates.Count; k++)
                         {
+                            // offset coordinates 10 places on Y axis because we want them to show in the secondary grid
                             if (players[currentplayer].AttemptedCoordinates[k].X == i && (players[currentplayer].AttemptedCoordinates[k].Y + 10) == j && !players[currentplayer].AttemptedCoordinates[k].wasCoordHit)
                             {
                                 Console.ForegroundColor = ConsoleColor.Yellow;
@@ -672,6 +678,7 @@ namespace Battleships
                                 Console.ResetColor();
                             }
 
+                            // mark red X on left hand side player grid if your ship was hit by the computer
                             else if (players[currentplayer].AttemptedCoordinates[k].X == i && (players[currentplayer].AttemptedCoordinates[k].Y + 10) == j && players[currentplayer].AttemptedCoordinates[k].wasCoordHit)
                             {
                                 Console.ForegroundColor = ConsoleColor.Red;
@@ -680,6 +687,7 @@ namespace Battleships
                                 Console.ResetColor();
                             }
 
+                            // show computer coordinates fired at player that didn't hit a ship on the left hand side grid (player ship view)
                             if (players[opposition].AttemptedCoordinates[k].X == i && (players[opposition].AttemptedCoordinates[k].Y) == j && !players[opposition].AttemptedCoordinates[k].wasCoordHit)
                             {
                                 Console.ForegroundColor = ConsoleColor.Cyan;
@@ -687,20 +695,44 @@ namespace Battleships
                                 match = true;
                                 Console.ResetColor();
                             }
-                        
-                        }           
+
+                        }
 
                         if (!match)
                         {
-                            if (i > 0 && j > 0)
+                            if (i > 0 && j > 0 && j <= 20)
                             {
                                 Console.Write("*  ");
                             }
                         }
+
+                        // draw legend
+                        if (j == 21 && i < legend.Count)
+                        {
+                            switch (i)
+                            {
+                                case 2:
+                                    Console.ForegroundColor = ConsoleColor.Blue;
+                                    break;
+                                case 3:
+                                    Console.ForegroundColor = ConsoleColor.Cyan;
+                                    break;
+                                case 4:
+                                    Console.ForegroundColor = ConsoleColor.Yellow;
+                                    break;
+                                case 5:
+                                    Console.ForegroundColor = ConsoleColor.Red;
+                                    break;
+                                default: Console.ForegroundColor = ConsoleColor.White; break;
+                            }
+
+                            Console.Write(legend[i]);
+                            Console.ResetColor();
+                        }
                         match = false;
                     }
-
-                    if (j == 20)
+                    // once we hit the edge of the boundary start a new line for the next row
+                    if (j == 30)
                     {
                         Console.WriteLine();
                     }
@@ -708,6 +740,7 @@ namespace Battleships
                     match = false;
                 }
             }
+
         }
     }
 }
