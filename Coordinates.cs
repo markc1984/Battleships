@@ -35,6 +35,9 @@ namespace Battleships
         public Player? shotCalledBy { get; set; }
 
         public Ship? Ship { get; set; }
+
     }
+
+
 }
 

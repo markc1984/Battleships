@@ -13,15 +13,15 @@ namespace Battleships
         static void Main(string[] args)
         {
             CreateLookupTables();
-            StartGame();
+            InitialiseGame();
 
             while (true)
             {
                 Console.WriteLine();
                 Coordinates? inputcoordinates;
-                if (currentplayer == 0)
+                if (currentplayer == (int)CurrentPlayer.Player)
                 {
-                    PrintGrid();
+                    PrintStats.PrintGrid(players[currentplayer], players[opposition]);
                     CheatSheet();
 
                     // print
@@ -70,43 +70,28 @@ namespace Battleships
                     //randomly choose coordinates
                     Random random = new Random();
                     inputcoordinates = new Coordinates { X = random.Next(1, 11), Y = random.Next(1, 11) };
-                    // if the shot has already been taken, reset the loop and start over
+                    // reinterate loop if the shot has already been taken
                     if (TakeAShot(inputcoordinates))
                     {
                         continue;
                     }
-                    // if shot hasn't been taken, move on to next player
                     else
                     {
-                        // decrement current player to human, increment opposing player to CPU
                         currentplayer--;
                         opposition++;
                     }
                 }
 
-                // here we check each iteration of the loop for progress of each player after each turn, if the player is eliminated we reinitialise the game
-                if (CheckIfPlayerIsEliminated(players[currentplayer]))
+                // check if the player is eliminated, if so reinitialise the game
+                if (players[currentplayer].CheckIfPlayerIsEliminated(players[currentplayer]))
                 {
                     Console.WriteLine("Congratulations " + players[opposition].EntrantName + " you won the game");
                     Console.WriteLine("Press enter to start again...");
                     Console.ReadLine();
                     Console.Clear();
-                    StartGame();
+                    InitialiseGame();
                 }
             }
-        }
-
-        // CheckForDuplicateTries checks existing entered coordinates against currently entered coordinates and returns true if there is a match
-        private static bool CheckForDuplicateTries(Coordinates coords)
-        {
-            for (int i = 0; i < players[currentplayer].AttemptedCoordinates.Count; i++)
-            {
-                if (coords.X == players[currentplayer].AttemptedCoordinates[i].X && coords.Y == players[currentplayer].AttemptedCoordinates[i].Y)
-                {
-                    return true;
-                }
-            }
-            return false;
         }
 
         // CreateLookupTables creates grid lookup table to translate inputted literal coordinate to integer equivalent
@@ -129,7 +114,7 @@ namespace Battleships
         }
 
         // StartGame starts a new game by erasing and readding players
-        private static void StartGame()
+        private static void InitialiseGame()
         {
             players = new List<Player>();
             // Add players to game
@@ -138,11 +123,9 @@ namespace Battleships
                 players.Add(new Player());
             }
 
-            // set the current player back to the human player if it wasn't set at that before
             currentplayer = 0;
             opposition = 1;
 
-            // Populate game with ships in random locations
 
             for (int i = 0; i < 2; i++)
             {
@@ -159,12 +142,12 @@ namespace Battleships
             Console.WriteLine("----------");
             for (int i = 0; i < players[1].ShipInventory.Count; i++)
             {
-                int ori = 0;
-                ori = players[1].ShipInventory[i].ShipOrientation;
+                int orientation = (int)ShipOrientation.Horizontal;
+                orientation = players[1].ShipInventory[i].ShipOrientation;
 
                 Console.WriteLine(GetShipName(players[1].ShipInventory[i]));
 
-                if (ori == 0)
+                if (orientation == (int)ShipOrientation.Horizontal)
                 {
                     Console.WriteLine("Horizontal");
                 }
@@ -184,43 +167,10 @@ namespace Battleships
         // a method that prints out the currently fired coordinates and the current state of the game
         private static void PrintStatistics()
         {
-            // display a key of what the different colours signify
-            Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Red = Hit/Ship Destroyed");
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("Blue = Miss/Ship Active");
-            Console.ResetColor();
             Console.WriteLine();
 
             for (int i = 0; i < players.Count; i++)
             {
-                Console.WriteLine("----------");
-                Console.WriteLine(players[i].EntrantName);
-                Console.WriteLine("----------");
-
-                if (players[i].AttemptedCoordinates.Count > 0)
-                {
-                    Console.Write("Attempted Coordinates: ");
-                }
-
-                for (int k = 0; k < players[i].AttemptedCoordinates.Count; k++)
-                {
-                    KeyValuePair<char, int> keyValuePair = CoordinatesLookupReverse(players[i].AttemptedCoordinates[k]);
-                    // mark attempted coordinate as red if it was a hit
-                    if (players[i].AttemptedCoordinates[k].wasCoordHit)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write(keyValuePair.Key + keyValuePair.Value.ToString() + " - Hit - " + "(" + GetShipName(players[i].AttemptedCoordinates[k].Ship) + ") ");
-                    }
-                    // mark attempted coordinate as blue if it was a miss
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                        Console.Write(keyValuePair.Key + keyValuePair.Value.ToString() + " ");
-                    }
-                    Console.ResetColor();
-                }
                 Console.WriteLine();
                 for (int j = 0; j < players[i].ShipInventory.Count; j++)
                 {
@@ -244,7 +194,6 @@ namespace Battleships
                 }
                 Console.WriteLine();
             }
-            Console.WriteLine();
             Console.WriteLine();
         }
 
@@ -288,8 +237,8 @@ namespace Battleships
         private static bool TakeAShot(Coordinates coords)
         {
             KeyValuePair<char, int> keyValuePair = CoordinatesLookupReverse(coords);
-            // if the coordinates aren't duplicated by the current player
-            if (!CheckForDuplicateTries(coords))
+
+            if (!players[currentplayer].CheckForDuplicateTries(coords))
             {
                 // if a ship is returned, this means there is a match
                 Coordinates? updatedCoordinates = RegisterHitCoordinates(coords, players[opposition]);
@@ -317,7 +266,6 @@ namespace Battleships
                     }
                 }
             }
-            // if the coordinates are a duplicate entry
             else
             {
                 Console.WriteLine(keyValuePair.Key + keyValuePair.Value.ToString() + " has already been fired upon by you");
@@ -328,27 +276,24 @@ namespace Battleships
             return false;
         }
 
-        // RegisterHitCoordinates records a valid, unique shot relative to the player
+        // RegisterHitCoordinates records a valid, unique shot for a player
         private static Coordinates? RegisterHitCoordinates(Coordinates coords, Player player)
         {
             players[currentplayer].AttemptedCoordinates.Add(coords);
 
             for (int i = 0; i < player.ShipInventory.Count; i++)
             {
-                // if ship has already been eliminated, we do not need to check again, move to next ship
                 if (player.ShipInventory[i].IsShipEliminated)
                 {
                     continue;
                 }
-                // for each coordinate of a ship
                 for (int j = 0; j < player.ShipInventory[i].CoOrds.Count; j++)
                 {
-                    // if the inputted coordinates match a ship occupying coordinate
                     if (coords.X == player.ShipInventory[i].CoOrds[j].X && coords.Y == player.ShipInventory[i].CoOrds[j].Y)
                     {
                         player.ShipInventory[i].CoOrds[j].wasCoordHit = true;
                         player.ShipInventory[i].CoOrds[j].shotCalledBy = player;
-                        // update the last added element in the attempted coordinates list to signify that we have a hit coordinate and who the shot was called by
+                        // update the last added element in the attempted coordinates list
                         players[currentplayer].AttemptedCoordinates[players[currentplayer].AttemptedCoordinates.Count - 1] = player.ShipInventory[i].CoOrds[j];
                         return player.ShipInventory[i].CoOrds[j];
                     }
@@ -360,7 +305,6 @@ namespace Battleships
         // a method that checks to see if all coordinates belonging to ship have been hit
         private static bool CheckIfShipIsEliminated(Ship? ship)
         {
-            // initialise a hit counter
             int hits = 0;
 
             for (int i = 0; i < ship.CoOrds.Count; i++)
@@ -375,37 +319,10 @@ namespace Battleships
                 ship.IsShipEliminated = true;
                 return true;
             }
-            // return false if ship is still intact
             return false;
         }
 
-        // CheckIfPlayerIsEliminated checks if all ships have been eliminated and returns true if it is found stated player loses all ships
-        private static bool CheckIfPlayerIsEliminated(Player player)
-        {
-            // initialise a counter
-            int shipseliminated = 0;
-
-            // for each ship in the player inventory
-            for (int i = 0; i < player.ShipInventory.Count; i++)
-            {
-                // if that ship has been eliminated, increase ship eliminated counter
-                if (player.ShipInventory[i].IsShipEliminated)
-                {
-                    shipseliminated++;
-                }
-            }
-            // if the counter equals the total number of ships in the inventory, this signifies the player has lost the game
-
-            if (shipseliminated == player.ShipInventory.Count)
-            {
-                // flag the player as eliminated, this should break out of the while loop in the main method
-                player.AllShipsEliminated = true;
-                return true;
-            }
-            return false;
-        }
-
-        // method that coverts integer coordinates back to literal using a reverse lookup table
+         // method that coverts integer coordinates back to literal using a reverse lookup table
         private static KeyValuePair<char, int> CoordinatesLookupReverse(Coordinates coords)
         {
             KeyValuePair<char, int> store;
@@ -416,36 +333,31 @@ namespace Battleships
             return store;
         }
 
-        // method that validates the entered X and Y literal coordinates, converts them to an integer and returns a coordinate object
+        // method that validates and converts string entry to decimal coordinates
         private static Coordinates? CoordinatesLookupTable(string str)
         {
             char column;
 
-            Char.TryParse(str.Substring(0, 1), out column);
-            // if the value in the lookup table exists, it means the entry is valid
-            if (map.TryGetValue(column, out int y))
+            if (Char.TryParse(str.Substring(0, 1).ToUpper(), out column))
             {
-                // if the numeric part of the string successfully parses
-                if (Int32.TryParse(str.Substring(1), out int x))
+                if (map.TryGetValue(column, out int y))
                 {
-                    // if the numeric value is equal or lower than the permitted boundary size
-                    if (y <= 10)
+                    if (Int32.TryParse(str.Substring(1), out int x))
                     {
-                        // retrieve the numeric equivalent of the lettered coordinate (column)
-
-                        // create a coordinate object and return it to calling method
-                        Coordinates coords = new Coordinates();
-                        coords.X = x;
-                        coords.Y = y;
-                        return coords;
-                    }
-                    else
-                    {
-                        return null;
+                        if (x >= 1 && x <= 10)
+                        {
+                            Coordinates coords = new Coordinates();
+                            coords.X = x;
+                            coords.Y = y;
+                            return coords;
+                        }
+                        else
+                        {
+                            return null;
+                        }
                     }
                 }
             }
-            // there was no such entry in the table, therefore return null
             else
             {
                 return null;
@@ -455,7 +367,6 @@ namespace Battleships
 
         private static void AddRandomShipsToGame(Player player)
         {
-            // instantiate a random object
             Random r = new Random();
             for (int i = 0; i < player.ShipInventory.Count; i++)
             {
@@ -468,54 +379,48 @@ namespace Battleships
             }
         }
         private static void GenerateCoordinateRanges(int x, int y, Ship ship, Player player)
-        {   // Create blank list of coordinates to be tested
-            List<Coordinates> coordinates = new List<Coordinates>();
-            // the end coordinate that the ship will reach on the x axis
-            int xupperbound = x + ship.NumOfSpaces;
-            // the end coordinate that the ship will reach on the y axis 
-            int yupperbound = y + ship.NumOfSpaces;
+        {   List<Coordinates> coordinates = new List<Coordinates>();
+            // the end coordinates that the ship will reach
+            int xupperboundary = x + ship.NumOfSpaces;
+            int yupperboundary = y + ship.NumOfSpaces;
             // origin x and y coordinates
-            int xvalue = x;
-            int yvalue = y;
+            int originxvalue = x;
+            int originyvalue = y;
 
             // if the shpi has been randomly placed horizontally across the axis, the x axis will remain fixed relative to Y
-            if (ship.ShipOrientation == (int)Orientation.Horizontal)
+            if (ship.ShipOrientation == (int)ShipOrientation.Horizontal)
             {
-                // these are the potential upper boundary limitations for a given ship placed horizontally
                 // if the chosen random coordinates PLUS the width of the ship go beyond 10 i.e beyond the bounds of the grid
-                if (yupperbound > 10)
+                if (yupperboundary > 10)
                 {
                     // offset the ship position start in the opposite direction to remain within the boundary
-                    yvalue = yvalue - ship.NumOfSpaces;
+                    originyvalue = originyvalue - ship.NumOfSpaces;
 
                 }
-                // if the chosen random coordinates PLUS the width of the ship does not exceed 10
+
                 for (int i = 0; i < ship.NumOfSpaces; i++)
                 {
                     // increment number of coordinate spaces from origin                    
-                    coordinates.Add(new Coordinates { X = x, Y = yvalue++ });
+                    coordinates.Add(new Coordinates { X = x, Y = originyvalue++ });
                 }
             }
-            // if the random ship orientation is vertical
-            else
+            else if (ship.ShipOrientation == (int)ShipOrientation.Vertical)
             {
-                if (xupperbound > 10)
+                if (xupperboundary > 10)
                 {
-                    xvalue = xvalue - ship.NumOfSpaces;
-
+                    originxvalue = originxvalue - ship.NumOfSpaces;
                 }
 
                 for (int i = 0; i < ship.NumOfSpaces; i++)
                 {
-                    coordinates.Add(new Coordinates { X = xvalue++, Y = y });
+                    coordinates.Add(new Coordinates { X = originxvalue++, Y = y });
                 }
 
             }
 
-            // if the ship hasn't already been added to the grid
             if (!ship.AlreadyAdded)
             {
-                // if there is a collision detected, generate new random coordinates and recurse till non conflicting coordinates are found
+                // if a collision is detected, recurse with new random coordinates
                 if (CheckForShipCollision(coordinates, player))
                 {
                     Random r = new Random();
@@ -525,10 +430,10 @@ namespace Battleships
                 }
                 else
                 {
-                    // If no collisions were found then we can safely assign these ship coordinates to the current ship
+                    // No collisions were found, safely ship coordinates to the current ship
                     ship.CoOrds = coordinates;
 
-                    // tag the ship to these coordinates so we can keep track of what ship the coordinates belong to
+                    // assign ship as the owner of these coordinates
                     for (int i = 0; i < coordinates.Count; i++)
                     {
                         coordinates[i].Ship = ship;
@@ -540,7 +445,7 @@ namespace Battleships
         }
         private static bool CheckForShipCollision(List<Coordinates> coords, Player player)
         {
-            // we now traverse the calculated coordinates and check other ships to see if they are already placed on the board
+            // traverse calculated coordinates and check other ships to see if they are already placed on the board
             for (int i = 0; i < player.ShipInventory.Count; i++)
             {
                 for (int j = 0; j < player.ShipInventory[i].CoOrds.Count; j++)
@@ -572,176 +477,6 @@ namespace Battleships
             return "";
         }
 
-        public static void PrintGrid()
-        {
-            // only run if human player is current player to stop unncessary code execution
-
-            char c = 'A';
-            int rowa = 1;
-            int rowb = 1;
-            List<string> legend = new List<string> { "Legend", "* = Unhit Coordinate", "o = Unhit Ship Coordinate", "x = Computer miss Player", "x = Player miss Computer", "X = Direct Hit" };
-
-            Console.Clear();
-            bool match = false;
-            Console.WriteLine("------------");
-            Console.WriteLine(players[currentplayer].EntrantName);
-            Console.WriteLine("------------");
-
-            // 2D loop iteration i and j equals axis coords
-            for (int i = 0; i <= 10; i++)
-            {
-                for (int j = 0; j <= 30; j++)
-                {
-                    // if the position is the second grid, produce a tab keypress and reset character back to A
-                    if (j == 11 || j == 21)
-                    {
-                        Console.Write("\t");
-                        c = 'A';
-                    }
-
-                    // if we are at the origin of either grid, we don't want any character to show as its not a valid grid coordinate
-                    if (j == 0 && i == 0 || j == 11 && i == 0)
-                    {
-                        Console.Write("  ");
-                    }
-
-                    // if we are at ONLY the beginning of the grid at X and within the bounds of Y, write letter coordinates out for each grid
-                    if (i == 0 && j >= 0 && j <= 9 || i == 0 && j >= 11 && j <= 20)
-                    {
-                        Console.Write(c + "  ");
-                        c++;
-                    }
-
-                    // only run this code if we are beyond row or column 0 (aka not at the origin or grid labels)
-                    if (i != 0 || j != 0)
-                    {
-                        for (int k = 0; k < players[0].ShipInventory.Count; k++)
-                        {
-                            for (int l = 0; l < players[0].ShipInventory[k].CoOrds.Count; l++)
-                            {
-                                if (players[0].ShipInventory[k].CoOrds[l].X == i && (players[0].ShipInventory[k].CoOrds[l].Y) == j && !players[0].ShipInventory[k].CoOrds[l].wasCoordHit)
-                                {
-                                    Console.ForegroundColor = ConsoleColor.Blue;
-                                    Console.Write("o  ");
-                                    match = true;
-                                    Console.ResetColor();
-                                }
-
-                                else if (players[0].ShipInventory[k].CoOrds[l].X == i && (players[0].ShipInventory[k].CoOrds[l].Y) == j && players[0].ShipInventory[k].CoOrds[l].wasCoordHit)
-                                {
-                                    Console.ForegroundColor = ConsoleColor.Red;
-                                    Console.Write("X  ");
-                                    match = true;
-                                    Console.ResetColor();
-                                }
-                            }
-                        }
-                    }
-
-                    // run this code block if there are previously no matching coordinates above
-                    if (!match)
-                    {
-                        if (j == 0 && i > 0 && i < 11)
-                        {
-                            if (i == 10)
-                            {
-                                Console.Write(rowa);
-                            }
-                            else
-                            {
-                                Console.Write(rowa + " ");
-                            }
-                            rowa++;
-                        }
-                        else if (j == 11 && i > 0 && i < 11)
-                        {
-                            if (i == 10)
-                            {
-                                Console.Write(rowb);
-
-                            }
-                            else
-                            {
-                                Console.Write(rowb + " ");
-                            }
-                            rowb++;
-                        }
-
-                        for (int k = 0; k < players[currentplayer].AttemptedCoordinates.Count; k++)
-                        {
-                            // offset coordinates 10 places on Y axis because we want them to show in the secondary grid
-                            if (players[currentplayer].AttemptedCoordinates[k].X == i && (players[currentplayer].AttemptedCoordinates[k].Y + 10) == j && !players[currentplayer].AttemptedCoordinates[k].wasCoordHit)
-                            {
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.Write("x  ");
-                                match = true;
-                                Console.ResetColor();
-                            }
-
-                            // mark red X on left hand side player grid if your ship was hit by the computer
-                            else if (players[currentplayer].AttemptedCoordinates[k].X == i && (players[currentplayer].AttemptedCoordinates[k].Y + 10) == j && players[currentplayer].AttemptedCoordinates[k].wasCoordHit)
-                            {
-                                Console.ForegroundColor = ConsoleColor.Red;
-                                Console.Write("X  ");
-                                match = true;
-                                Console.ResetColor();
-                            }
-
-                            // show computer coordinates fired at player that didn't hit a ship on the left hand side grid (player ship view)
-                            if (players[opposition].AttemptedCoordinates[k].X == i && (players[opposition].AttemptedCoordinates[k].Y) == j && !players[opposition].AttemptedCoordinates[k].wasCoordHit)
-                            {
-                                Console.ForegroundColor = ConsoleColor.Cyan;
-                                Console.Write("x  ");
-                                match = true;
-                                Console.ResetColor();
-                            }
-
-                        }
-
-                        if (!match)
-                        {
-                            if (i > 0 && j > 0 && j <= 20)
-                            {
-                                Console.Write("*  ");
-                            }
-                        }
-
-                        // draw legend
-                        if (j == 21 && i < legend.Count)
-                        {
-                            switch (i)
-                            {
-                                case 2:
-                                    Console.ForegroundColor = ConsoleColor.Blue;
-                                    break;
-                                case 3:
-                                    Console.ForegroundColor = ConsoleColor.Cyan;
-                                    break;
-                                case 4:
-                                    Console.ForegroundColor = ConsoleColor.Yellow;
-                                    break;
-                                case 5:
-                                    Console.ForegroundColor = ConsoleColor.Red;
-                                    break;
-                                default: Console.ForegroundColor = ConsoleColor.White; break;
-                            }
-
-                            Console.Write(legend[i]);
-                            Console.ResetColor();
-                        }
-                        match = false;
-                    }
-                    // once we hit the edge of the boundary start a new line for the next row
-                    if (j == 30)
-                    {
-                        Console.WriteLine();
-                    }
-
-                    match = false;
-                }
-            }
-
-        }
     }
 }
 

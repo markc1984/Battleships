@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Battleships
 {
-    public enum Orientation { Horizontal, Vertical };
+    public enum ShipOrientation { Horizontal, Vertical };
     public enum ShipType { Battleship, Destroyer };
 
     // the ship class contains information about each ship, including the type of ship, the coordinates that belong to the ship, as well as containing information such as if the ship was destroyed, its orientation on the grid, the number of spaces it occupies and
@@ -22,7 +22,7 @@ namespace Battleships
         public Ship(int shiptype)
         {
             Random r = new Random();
-           orientatation = r.Next(0, 2);
+            orientatation = r.Next(0, 2);
 
             if (shiptype == (int)ShipType.Battleship)
             {
@@ -85,4 +85,6 @@ namespace Battleships
         }
         #endregion
     }
+
+
 }
