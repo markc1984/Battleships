@@ -319,6 +319,8 @@ namespace Battleships
    
         private static void InitialiseGame()
         {
+            cheatmode = false;
+
             players = new List<Player>();
 
             for (int i = 0; i < 2; i++)
@@ -346,7 +348,7 @@ namespace Battleships
 
             Console.WriteLine("Welcome to Battleships! Prepare your navy for war with the computer!");
             Console.WriteLine();
-            Console.WriteLine("Hint! You can see where the computer ships are located by typing 'Cheat' at the coordinates entry!, typing this again disables the option");
+            Console.WriteLine("Hint! You can see where the computer ships are located by typing 'cheat' at the coordinates entry! Typing this again disables the option");
             Console.WriteLine();
             Console.Write("Please enter your name: ");
 
