@@ -7,24 +7,18 @@ using System.Threading.Tasks;
 namespace Battleships
 {
     public enum CurrentPlayer { Player, Computer }
-    // the player class stores all information about the player, the list of ships in the inventory and a list of attempted coordinates, irrespective of whether those coordinates belonged to a ship or not
     public class Player
     {
         #region Class constructors
         public Player()
         {
-            // when a player class is instantiated, automatically populate new ships to the grid
-            for (int i = 0; i < 2; i++)
-            {
-                shipinventory.Add(new Ship((int)ShipType.Destroyer));
-            }
-            shipinventory.Add(new Ship((int)ShipType.Battleship));
+       
         }
         #endregion
 
         #region Class variables
-        private List<Ship> shipinventory = new List<Ship>();
-        private List<Coordinates> attemptedcoordinates = new List<Coordinates>();
+        private List<Ship> shipinventory = new();
+        private List<Coordinates> attemptedcoordinates = new();
         private bool shipseliminated;
 
         #endregion
@@ -90,6 +84,33 @@ namespace Battleships
             }
             return false;
         }
+
+        // RegisterHitCoordinates records a valid, unique shot for a player
+        public Coordinates? RegisterHitCoordinates(Coordinates coords, Player player)
+        {
+            attemptedcoordinates.Add(coords);
+
+            for (int i = 0; i < player.ShipInventory.Count; i++)
+            {
+                if (player.ShipInventory[i].IsShipEliminated)
+                {
+                    continue;
+                }
+                for (int j = 0; j < player.ShipInventory[i].CoOrds.Count; j++)
+                {
+                    if (coords.X == player.ShipInventory[i].CoOrds[j].X && coords.Y == player.ShipInventory[i].CoOrds[j].Y)
+                    {
+                        player.ShipInventory[i].CoOrds[j].WasCoordHit = true;
+                        // update the last added element in the attempted coordinates list
+                        attemptedcoordinates[attemptedcoordinates.Count - 1] = player.ShipInventory[i].CoOrds[j];
+                        return player.ShipInventory[i].CoOrds[j];
+                    }
+                }
+            }
+            return null;
+        }
+
+
         #endregion
     }
 }

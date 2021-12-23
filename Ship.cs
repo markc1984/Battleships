@@ -21,7 +21,7 @@ namespace Battleships
         // randomly orientate the ship position when it is instantiated
         public Ship(int shiptype)
         {
-            Random r = new Random();
+            Random r = new();
             orientatation = r.Next(0, 2);
 
             if (shiptype == (int)ShipType.Battleship)
@@ -72,7 +72,7 @@ namespace Battleships
             set { coordinates = value; }
         }
 
-        public bool AlreadyAdded
+        public bool AlreadyAddedToGame
         {
             get { return alreadyadded; }
             set { alreadyadded = value; }
@@ -84,6 +84,29 @@ namespace Battleships
             set { typeofship = value; }
         }
         #endregion
+
+        // a method that checks to see if all coordinates belonging to ship have been hit
+        public bool CheckIfShipIsEliminated(Ship? ship)
+        {
+            if (ship != null)
+            {
+                int hits = 0;
+
+                for (int i = 0; i < CoOrds.Count; i++)
+                {
+                    if (CoOrds[i].WasCoordHit)
+                    {
+                        hits++;
+                    }
+                }
+                if (hits == NumOfSpaces)
+                {
+                    ship.IsShipEliminated = true;
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
 

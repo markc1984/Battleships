@@ -26,13 +26,11 @@ namespace Battleships
             set { y = value; }
         }
 
-        public bool wasCoordHit
+        public bool WasCoordHit
         {
             get { return coordhit; }
             set { coordhit = value; }
         }
-
-        public Player? shotCalledBy { get; set; }
 
         public Ship? Ship { get; set; }
 
