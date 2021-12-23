@@ -9,6 +9,8 @@ namespace Battleships
         private static int currentplayer = 0;
         private static int opposition = 1;
         private static bool cheatmode = false;
+        private static ConsoleKey key;
+
 
 
         static void Main(string[] args)
@@ -31,7 +33,6 @@ namespace Battleships
                     }
 
                     // print
-                    Console.WriteLine();
                     Console.Write(players[currentplayer].EntrantName + ", please enter your grid co-ordinates (e.g A3, B5): ");
                     // Use lookup table to convert literal coordinates in to a numeric coordinate object
                     string? consoleinput;
@@ -40,11 +41,24 @@ namespace Battleships
 
                     if (!String.IsNullOrWhiteSpace(consoleinput))
                     {
+                        if (consoleinput.ToLower() == "cheat")
+                        {
+                            if (!cheatmode)
+                            {
+                                cheatmode = true;
+                            }
+                            else if (cheatmode)
+                            {
+                                cheatmode = false;
+                            }
+                            continue;
+                        }
                         inputcoordinates = CoordinatesLookupTable(consoleinput);
                         // if returned coordinates are null, it means the entry entered went beyond the 10 x 10 grid
                         if (inputcoordinates == null)
                         {
-                            Console.WriteLine("Coordinates out of bounds, please try again.");
+                            Console.WriteLine("Coordinates out of bounds, please enter to try again.....");
+                            Console.ReadKey();
                             continue;
                         }
 
@@ -65,7 +79,8 @@ namespace Battleships
                     }
                     else
                     {
-                        Console.WriteLine("Invalid entry, please try again.");
+                        Console.WriteLine("Invalid entry, press enter to try again.....");
+                        Console.ReadKey();
                         continue;
                     }
                 }
@@ -92,25 +107,35 @@ namespace Battleships
                 {
                     Console.WriteLine("Congratulations " + players[opposition].EntrantName + " you won the game");
                     Console.WriteLine("Press enter to start again...");
-                    Console.ReadLine();
+                    Console.ReadKey();
                     Console.Clear();
                     InitialiseGame();
                 }
             }
         }
 
-        public static void PrintGrid(Player currentplayer, Player opposition)
+        public static string PrintDashes(int numOfDashes)
+        {
+            string dashes = "";
+
+            for (int i = 0; i < numOfDashes; i++)
+            {
+                dashes += "-";
+            }
+            return dashes;
+        }
+
+        public static void PrintGrid(Player player, Player opposition)
         {
             char c = 'A';
             int rowa = 1;
             int rowb = 1;
-            List<string> legend = new() { "Legend", "* = Unhit Coordinate", "o = Unhit Player Ship Coordinate", "x = Computer miss", "x = Player miss", "X = Direct Hit" };
-
-            Console.WriteLine();
+            List<string> legend = new() {PrintDashes(6), "Legend", PrintDashes(6), "* = Unhit Coordinate", "o = Unhit Player Ship Coordinate", "x = Computer miss", "x = Player miss", "X = Direct Hit" };
             bool match = false;
-            Console.WriteLine("------------");
-            Console.WriteLine(currentplayer.EntrantName);
-            Console.WriteLine("------------");
+
+            Console.WriteLine(PrintDashes(player.EntrantName.Length));
+            Console.WriteLine(player.EntrantName);
+            Console.WriteLine(PrintDashes(player.EntrantName.Length));
 
             for (int i = 0; i <= 10; i++)
             {
@@ -139,11 +164,11 @@ namespace Battleships
                     // if we are beyond row or column 0
                     if (i != 0 || j != 0)
                     {
-                        for (int k = 0; k < currentplayer.ShipInventory.Count; k++)
+                        for (int k = 0; k < player.ShipInventory.Count; k++)
                         {
-                            for (int l = 0; l < currentplayer.ShipInventory[k].CoOrds.Count; l++)
+                            for (int l = 0; l < player.ShipInventory[k].CoOrds.Count; l++)
                             {
-                                if (currentplayer.ShipInventory[k].CoOrds[l].X == i && (currentplayer.ShipInventory[k].CoOrds[l].Y) == j && !currentplayer.ShipInventory[k].CoOrds[l].WasCoordHit)
+                                if (player.ShipInventory[k].CoOrds[l].X == i && (player.ShipInventory[k].CoOrds[l].Y) == j && !player.ShipInventory[k].CoOrds[l].WasCoordHit)
                                 {
                                     Console.ForegroundColor = ConsoleColor.Blue;
                                     Console.Write("o  ");
@@ -151,7 +176,7 @@ namespace Battleships
                                     Console.ResetColor();
                                 }
 
-                                else if (currentplayer.ShipInventory[k].CoOrds[l].X == i && (currentplayer.ShipInventory[k].CoOrds[l].Y) == j && currentplayer.ShipInventory[k].CoOrds[l].WasCoordHit)
+                                else if (player.ShipInventory[k].CoOrds[l].X == i && (player.ShipInventory[k].CoOrds[l].Y) == j && player.ShipInventory[k].CoOrds[l].WasCoordHit)
                                 {
                                     Console.ForegroundColor = ConsoleColor.Red;
                                     Console.Write("X  ");
@@ -190,10 +215,10 @@ namespace Battleships
                             rowb++;
                         }
 
-                        for (int k = 0; k < currentplayer.AttemptedCoordinates.Count; k++)
+                        for (int k = 0; k < player.AttemptedCoordinates.Count; k++)
                         {
                             // offset attempted coordinates 10 places on Y axis because we want them to show in the secondary grid
-                            if (currentplayer.AttemptedCoordinates[k].X == i && (currentplayer.AttemptedCoordinates[k].Y + 10) == j && !currentplayer.AttemptedCoordinates[k].WasCoordHit)
+                            if (player.AttemptedCoordinates[k].X == i && (player.AttemptedCoordinates[k].Y + 10) == j && !player.AttemptedCoordinates[k].WasCoordHit)
                             {
                                 Console.ForegroundColor = ConsoleColor.Yellow;
                                 Console.Write("x  ");
@@ -202,7 +227,7 @@ namespace Battleships
                             }
 
                             // mark red X on left hand side of human player grid if ship coordinate was hit by the computer
-                            else if (currentplayer.AttemptedCoordinates[k].X == i && (currentplayer.AttemptedCoordinates[k].Y + 10) == j && currentplayer.AttemptedCoordinates[k].WasCoordHit)
+                            else if (player.AttemptedCoordinates[k].X == i && (player.AttemptedCoordinates[k].Y + 10) == j && player.AttemptedCoordinates[k].WasCoordHit)
                             {
                                 Console.ForegroundColor = ConsoleColor.Red;
                                 Console.Write("X  ");
@@ -231,31 +256,34 @@ namespace Battleships
 
 
                         // legend
-                        if (j == 21 && i < legend.Count)
+                        if (player.PlayerID == (int)CurrentPlayer.Player)
                         {
-                            if (i == 2)
+                            if (j == 21 && i < legend.Count)
                             {
-                                Console.ForegroundColor = ConsoleColor.Blue;
-                            }
-                            else if (i == 3)
-                            {
-                                Console.ForegroundColor = ConsoleColor.Cyan;
-                            }
-                            else if (i == 4)
-                            {
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                            }
-                            else if (i == 5)
-                            {
-                                Console.ForegroundColor = ConsoleColor.Red;
-                            }
-                            else
-                            {
-                                Console.ForegroundColor = ConsoleColor.White;
-                            }
+                                if (i == 3)
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Blue;
+                                }
+                                else if (i == 4)
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Cyan;
+                                }
+                                else if (i == 5)
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Yellow;
+                                }
+                                else if (i == 6)
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Red;
+                                }
+                                else
+                                {
+                                    Console.ForegroundColor = ConsoleColor.White;
+                                }
 
-                            Console.Write(legend[i]);
-                            Console.ResetColor();
+                                Console.Write(legend[i]);
+                                Console.ResetColor();
+                            }
                         }
                     }
                     // once edge of the boundary is reached, start a new line for next row
@@ -266,7 +294,7 @@ namespace Battleships
                     match = false;
                 }
             }
-
+            Console.WriteLine();
         }
 
         // CreateLookupTables creates grid lookup table to translate inputted literal coordinate to integer equivalent
@@ -300,7 +328,9 @@ namespace Battleships
 
             currentplayer = 0;
             opposition = 1;
-             
+            players[0].PlayerID = (int)CurrentPlayer.Player;
+            players[1].PlayerID = (int)CurrentPlayer.Computer;
+
             for (int i = 0; i < 2; i++)
             {
                 List<Ship> shiplist = new();
@@ -314,6 +344,10 @@ namespace Battleships
                 AddRandomShipsToGame(players[i], shiplist);
             }
 
+            Console.WriteLine("Welcome to Battleships! Prepare your navy for war with the computer!");
+            Console.WriteLine();
+            Console.WriteLine("Hint! You can see where the computer ships are located by typing 'Cheat' at the coordinates entry!, typing this again disables the option");
+            Console.WriteLine();
             Console.Write("Please enter your name: ");
 
             players[0].EntrantName = Console.ReadLine();
@@ -367,7 +401,11 @@ namespace Battleships
             }
             else
             {
-                Console.WriteLine(keyValuePair.Key + keyValuePair.Value.ToString() + " has already been fired upon by you");
+                if (currentplayer == (int)CurrentPlayer.Player)
+                {
+                    Console.WriteLine(keyValuePair.Key + keyValuePair.Value.ToString() + " has already been fired upon by you. Press enter to try again....");
+                    Console.ReadKey();
+                }
                 return true;
             }
             return false;

@@ -20,6 +20,7 @@ namespace Battleships
         private List<Ship> shipinventory = new();
         private List<Coordinates> attemptedcoordinates = new();
         private bool shipseliminated;
+        private int playerid;
 
         #endregion
 
@@ -36,6 +37,12 @@ namespace Battleships
         {
             get { return shipseliminated; }
             set { shipseliminated = value; }
+        }
+
+        public int PlayerID
+        {
+            get { return playerid; }
+            set { playerid = value; }
         }
 
         public List<Coordinates> AttemptedCoordinates
